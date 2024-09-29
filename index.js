@@ -1,0 +1,116 @@
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const { initPinecone } = require("./utils/init_pinecone");
+const { doc_to_chunk } = require("./utils/doc_to_chunk");
+const { chunk_to_vec } = require("./utils/chunk_to_vec");
+const { store_vec } = require("./utils/store_vec");
+const { initGenAI } = require("./utils/init_gen_ai");
+const { generateAIResponse } = require("./utils/generate_ai_response");
+
+const app = express();
+
+// middlewares
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  })
+);
+app.use(express.json());
+
+// INITIALIZING PINECONE INSTANCE
+const pineconeIndex = initPinecone();
+
+// TEST API
+app.get("/api", async (req, res) => res.json({ message: "API Running" }));
+
+// GENERATE EMBEDDINGS
+app.post("/api/text-to-vec", async (req, res) => {
+  const { pdf_document, name_space } = req.body;
+
+  if (!pdf_document || pdf_document?.length <= 0) {
+    res.json({ error: "Document required", message: "Document not found" });
+  }
+
+  if (!name_space || name_space?.length <= 0) {
+    res.json({ error: "Namespace required", message: "Namespace is missing" });
+  }
+
+  try {
+    // SPLITTING LONG TEXT IN TO SMALL CHUNKS
+    const text_chunks = await doc_to_chunk(pdf_document);
+    console.log("\nStep 1/3 - Chunking complete!");
+
+    // CONVERTING CHUNKS INTO VECTOR EMBEDDINGS
+    const embedded_chunks = await chunk_to_vec(text_chunks);
+    console.log("\nStep 2/3 - Embedding complete!");
+
+    // SAVING EMBEDDINGS TO THE DATABASE
+    await store_vec(embedded_chunks, text_chunks, name_space, pineconeIndex);
+    console.log("\nStep 3/3 - Pinecone db complete!");
+
+    res.json({
+      success: true,
+      message: "PDF processed and embeddings stored in Pinecone",
+    });
+  } catch (error) {
+    console.error("Error =======>", error);
+    return res.status(500).json({ message: "Error while processing PDF" });
+  }
+});
+
+// REQUEST QUERY
+app.post("/api/query", async (req, res) => {
+  const { question, name_space } = req.body;
+
+  if (!question || question?.length <= 0) {
+    res.json({ error: "Question required", message: "Question not found" });
+  }
+
+  if (!name_space || name_space?.length <= 0) {
+    res.json({ error: "Namespace required", message: "Namespace is missing" });
+  }
+
+  try {
+    // CONVERTING QUESTION INTO VECTOR EMBEDDINGS
+    const embedded_question = await chunk_to_vec([question]);
+    console.log("\nStep 1/3 - Embedding complete!");
+
+    // QUERYING PINECONE DB TO GET THE MATCHING VECTOR
+    const query_response = await pineconeIndex
+      .namespace(`${name_space}`)
+      .query({
+        vector: embedded_question[0],
+        topK: 8,
+        includeMetadata: true,
+      });
+    console.log("\nStep 2/3 - Query pinecone completed!");
+
+    // MAKING SINGLE DOCUMENT FOR CONTEXT FROM PINE CONE RESPONSE
+    const context_document = query_response.matches
+      ?.map((match) => match.metadata.page_text)
+      ?.join(" ");
+
+    // REQUESTING LLM TO GENERATE RESPONSE
+    const ai_response = await generateAIResponse(context_document, question);
+    console.log("\nStep 3/3 - AI Response Generated!");
+
+    res.json({
+      success: true,
+      question,
+      context_document,
+      ai_response,
+      message: "PDF processed successfully",
+    });
+  } catch (error) {
+    console.error("Error =======>", error);
+    return res.status(500).json({ message: "Error while processing PDF" });
+  }
+});
+
+// START THE SERVER
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
