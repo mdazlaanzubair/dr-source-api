@@ -1,12 +1,12 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { initPinecone } = require("./utils/init_pinecone");
-const { doc_to_chunk } = require("./utils/doc_to_chunk");
-const { chunk_to_vec } = require("./utils/chunk_to_vec");
-const { store_vec } = require("./utils/store_vec");
-const { initGenAI } = require("./utils/init_gen_ai");
-const { generateAIResponse } = require("./utils/generate_ai_response");
+const { initPinecone } = require("../utils/init_pinecone");
+const { doc_to_chunk } = require("../utils/doc_to_chunk");
+const { chunk_to_vec } = require("../utils/chunk_to_vec");
+const { store_vec } = require("../utils/store_vec");
+const { initGenAI } = require("../utils/init_gen_ai");
+const { generateAIResponse } = require("../utils/generate_ai_response");
 
 const app = express();
 
