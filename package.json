@@ -2,14 +2,24 @@
   "name": "dr-source-api",
   "version": "1.0.0",
   "main": "index.js",
+  "keywords": [
+    "javascript",
+    "nodejs",
+    "expressjs",
+    "AI",
+    "LLM",
+    "Gemini",
+    "langchain",
+    "pinecode db"
+  ],
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "vercel-build": "echo API deployed on vercel!"
   },
-  "author": "",
+  "author": "Muhammad Azlaan Zubair",
   "license": "ISC",
-  "description": "",
+  "description": "A langchain based API for Dr. Source",
   "dependencies": {
     "@google/generative-ai": "^0.20.0",
     "@huggingface/inference": "^2.8.0",
