@@ -21,12 +21,8 @@ async function generateAIResponse(context, question) {
         ${question}
   
         Answer:
-      `
+      `,
     );
-
-    console.log();
-    console.log(result?.response?.text());
-    console.log();
 
     return JSON.parse(result?.response?.text())?.reply;
   } catch (error) {
