@@ -10,8 +10,8 @@ async function generateAIResponse(context, question) {
     const prompt = `You are an AI assistant and good in finding answers from the given context. 
           Your goal is to provide detailed answers to user from the provided context. Make sure
           to provide all the details necessary to satisfy the user. If the answer is not provided 
-          in context, just politely say that "You are unable to answer". Remember don not provide 
-          wrong answer.
+          in context, just politely say that did not find to answer in the document. Remember do 
+          not provide wrong answer.
     
           Context:
           ${context}
