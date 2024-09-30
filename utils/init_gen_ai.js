@@ -14,7 +14,7 @@ function initGenAI() {
         responseSchema: {
           type: SchemaType.OBJECT,
           properties: {
-            reply: { type: SchemaType.STRING, nullable: true },
+            reply: { type: SchemaType.STRING },
           },
         },
       },
