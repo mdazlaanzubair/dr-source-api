@@ -5,7 +5,6 @@ const { initPinecone } = require("../utils/init_pinecone");
 const { doc_to_chunk } = require("../utils/doc_to_chunk");
 const { chunk_to_vec } = require("../utils/chunk_to_vec");
 const { store_vec } = require("../utils/store_vec");
-const { initGenAI } = require("../utils/init_gen_ai");
 const { generateAIResponse } = require("../utils/generate_ai_response");
 const { text_pre_processor } = require("../utils/text_pre_processor");
 
@@ -54,6 +53,7 @@ app.post("/api/text-to-vec", async (req, res) => {
     // CONVERTING CHUNKS INTO VECTOR EMBEDDINGS
     start_time = performance.now(); // RESET START TIME
     const embedded_chunks = await chunk_to_vec(text_chunks);
+
     process_eval.vectors_embedding = performance.now() - start_time; // CALCULATING TIME
     console.log("\nStep 2/3 - Embedding complete!");
 

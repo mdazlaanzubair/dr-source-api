@@ -53,7 +53,7 @@ async function chunk_to_vec(text_chunks) {
       embedded_chunks.push(...response.data);
 
       // Adding a delay between batches to avoid rate limits
-      await delay(3000); // 1-second delay between batches (you can adjust this)
+      await delay(100); // 1-second delay between batches (you can adjust this)
     } catch (error) {
       console.error(
         `Error processing batch starting at chunk ${i}:`,

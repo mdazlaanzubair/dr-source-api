@@ -22,7 +22,7 @@
   "description": "A langchain based API for Dr. Source",
   "dependencies": {
     "@google/generative-ai": "^0.20.0",
-    "@huggingface/inference": "^2.8.0",
+    "@huggingface/inference": "^2.8.1",
     "@pinecone-database/pinecone": "^3.0.3",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
