@@ -1,4 +1,5 @@
 const { lc_splitter } = require("./lc_splitter");
+const { text_pre_processor } = require("./text_pre_processor");
 
 // FUNCTION TO SPLIT TEXT TO CHUNKS RECURSIVELY USING LANG_CHAIN
 async function doc_to_chunk(pdf_document) {
@@ -16,12 +17,14 @@ async function doc_to_chunk(pdf_document) {
   // =========================
   // HERE IS THE NEW APPROACH
   // =========================
-  // HERE IS THE NEW APPROACH INSTEAD OF PAGE BY PAGE CHUNKING
   // WE'LL MERGE ALL PAGES TEXT INTO ONE BIT RAW TEXT AND THEN
-  // MAKE SMALL CHUNKS FROM IT
   let raw_text = pdf_document?.map(({ page_text }) => page_text)?.join(" ");
 
-  return await lc_splitter.splitText(raw_text);
+  // PREPROCESSING THE TEXT BEFORE CHUNKING
+  const pre_processed_text = text_pre_processor(raw_text);
+
+  // HERE IS THE NEW APPROACH INSTEAD OF PAGE BY PAGE CHUNKING
+  return await lc_splitter.splitText(pre_processed_text);
 }
 
 module.exports = { doc_to_chunk };

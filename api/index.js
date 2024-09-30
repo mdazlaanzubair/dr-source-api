@@ -7,6 +7,7 @@ const { chunk_to_vec } = require("../utils/chunk_to_vec");
 const { store_vec } = require("../utils/store_vec");
 const { initGenAI } = require("../utils/init_gen_ai");
 const { generateAIResponse } = require("../utils/generate_ai_response");
+const { text_pre_processor } = require("../utils/text_pre_processor");
 
 const app = express();
 
@@ -74,7 +75,8 @@ app.post("/api/query", async (req, res) => {
 
   try {
     // CONVERTING QUESTION INTO VECTOR EMBEDDINGS
-    const embedded_question = await chunk_to_vec([question]);
+    const pre_processed_question = text_pre_processor(question);
+    const embedded_question = await chunk_to_vec([pre_processed_question]);
     console.log("\nStep 1/3 - Embedding complete!");
 
     // QUERYING PINECONE DB TO GET THE MATCHING VECTOR
@@ -82,18 +84,20 @@ app.post("/api/query", async (req, res) => {
       .namespace(`${name_space}`)
       .query({
         vector: embedded_question[0],
-        topK: 8,
+        topK: 10,
         includeMetadata: true,
       });
     console.log("\nStep 2/3 - Query pinecone completed!");
 
     // MAKING SINGLE DOCUMENT FOR CONTEXT FROM PINE CONE RESPONSE
-    const context_document = query_response.matches
-      ?.map((match) => match.metadata.page_text)
-      ?.join(" ");
-
-    // REQUESTING LLM TO GENERATE RESPONSE
-    const ai_response = await generateAIResponse(context_document, question);
+    const context_document = query_response.matches?.map(
+      (match) => match.metadata.page_text
+    );
+    // REQUESTING LLM TO GENERATE RESPONSE BY MERGING ALL MATCHED CONTEXT DOCS INTO SINGLE STRING
+    const ai_response = await generateAIResponse(
+      context_document?.join(" "),
+      question
+    );
     console.log("\nStep 3/3 - AI Response Generated!");
 
     res.json({
