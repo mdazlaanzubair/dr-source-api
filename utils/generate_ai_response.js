@@ -1,7 +1,7 @@
-const { initGenAI } = require("./init_gen_ai");
+import { initGenAI } from "./init_gen_ai.js";
 
 // INITIALIZING GEMINI AI SDK
-async function generateAIResponse(context, question) {
+export async function generateAIResponse(context, question) {
   try {
     // INITIALIZING GEN_AI INSTANCE
     const genAIModel = initGenAI();
@@ -31,5 +31,3 @@ async function generateAIResponse(context, question) {
     throw new Error("Failed to generate AI response");
   }
 }
-
-module.exports = { generateAIResponse };

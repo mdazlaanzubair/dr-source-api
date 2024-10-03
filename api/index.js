@@ -1,12 +1,15 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const { initPinecone } = require("../utils/init_pinecone");
-const { doc_to_chunk } = require("../utils/doc_to_chunk");
-const { chunk_to_vec } = require("../utils/chunk_to_vec");
-const { store_vec } = require("../utils/store_vec");
-const { generateAIResponse } = require("../utils/generate_ai_response");
-const { text_pre_processor } = require("../utils/text_pre_processor");
+import express, { json } from "express";
+import cors from "cors";
+import { store_vec } from "../utils/store_vec.js";
+import { generateAIResponse } from "../utils/generate_ai_response.js";
+import { text_pre_processor } from "../utils/text_pre_processor.js";
+import { chunk_to_vec_transformer } from "../utils/chunk_to_vec_transformer.js";
+import dotenv from "dotenv";
+import { initPinecone } from "../utils/init_pinecone.js";
+import { doc_to_chunk } from "../utils/doc_to_chunk.js";
+import { chunk_to_vec } from "../utils/chunk_to_vec.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -17,7 +20,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(json());
 
 // INITIALIZING PINECONE INSTANCE
 const pineconeIndex = initPinecone();
@@ -52,7 +55,8 @@ app.post("/api/text-to-vec", async (req, res) => {
 
     // CONVERTING CHUNKS INTO VECTOR EMBEDDINGS
     start_time = performance.now(); // RESET START TIME
-    const embedded_chunks = await chunk_to_vec(text_chunks);
+    // const embedded_chunks = await chunk_to_vec(text_chunks);
+    const embedded_chunks = await chunk_to_vec_transformer(text_chunks);
 
     process_eval.vectors_embedding = performance.now() - start_time; // CALCULATING TIME
     console.log("\nStep 2/3 - Embedding complete!");
@@ -105,7 +109,8 @@ app.post("/api/query", async (req, res) => {
     process_eval.text_chunking = performance.now() - start_time; // CALCULATING TIME
 
     start_time = performance.now(); // RESET START TIME
-    const embedded_question = await chunk_to_vec([pre_processed_question]);
+    // const embedded_question = await chunk_to_vec([pre_processed_question]);
+    const embedded_question = await chunk_to_vec_transformer([pre_processed_question]);
     process_eval.vectors_embedding = performance.now() - start_time; // CALCULATING TIME
     console.log("Step 1/3 - Embedding complete!");
 
@@ -115,7 +120,7 @@ app.post("/api/query", async (req, res) => {
       .namespace(`${name_space}`)
       .query({
         vector: embedded_question[0],
-        topK: 10,
+        topK: 15,
         includeMetadata: true,
       });
     process_eval.similarity_search = performance.now() - start_time; // CALCULATING TIME

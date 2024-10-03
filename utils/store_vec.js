@@ -1,5 +1,5 @@
 // FUNCTION TO STORE THE VECTOR EMBEDDINGS TO THE DATABASE
-async function store_vec(
+export async function store_vec(
   embedded_chunks,
   text_chunks,
   name_space,
@@ -33,22 +33,29 @@ async function store_vec(
   // =========================
   // ITERATING ALL EMBEDDED_CHUNKS AND PREPARING REFERENCE FOR
   // PINECONE_DB FOR SAVING IN PINECONE_DB
-  const vectors_refs = embedded_chunks.map((vector, index) => {
-    return {
-      id: `${index}-doc-${Date.now().toString()}`, // Simple unique ID generation
-      values: vector, // VECTOR OF THE TEXT
-      metadata: {
-        page_text: text_chunks[index],
-      },
-    };
-  });
+  const vectors_refs = embedded_chunks.map((vector, index) => ({
+    id: `${index}-doc-${Date.now().toString()}`, // Simple unique ID generation
+    values: vector, // VECTOR OF THE TEXT
+    metadata: {
+      page_text: text_chunks[index],
+    },
+  }));
+
+  // Splitting vectors into batches
+  const batches = [];
+  const batchSize = 1000;
+  for (let i = 0; i < vectors_refs.length; i += batchSize) {
+    batches.push(vectors_refs.slice(i, i + batchSize));
+  }
+
   try {
     // STORING REFERENCE IN THE DB AT USER NAMESPACE PROVIDED
     // BY FRONTEND i.e. user_id + - + file_slug
-    pineconeIndex.namespace(`${name_space}`).upsert(vectors_refs);
+    // Upsert each batch to Pinecone
+    for (const batch of batches) {
+      await pineconeIndex.namespace(`${name_space}`).upsert(batch);
+    }
   } catch (error) {
     throw error;
   }
 }
-
-module.exports = { store_vec };

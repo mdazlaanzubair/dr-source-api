@@ -1,7 +1,7 @@
-const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 // INITIALIZING GEMINI AI SDK
-function initGenAI() {
+export function initGenAI() {
   try {
     // INITIALIZE THE AI MODEL WITH API KEY
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
@@ -26,5 +26,3 @@ function initGenAI() {
     throw new Error("Failed to initialize GenAI Client");
   }
 }
-
-module.exports = { initGenAI };

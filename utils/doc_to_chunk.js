@@ -1,8 +1,8 @@
-const { lc_splitter } = require("./lc_splitter");
-const { text_pre_processor } = require("./text_pre_processor");
+import { lc_splitter } from "./lc_splitter.js";
+import { text_pre_processor } from "./text_pre_processor.js";
 
 // FUNCTION TO SPLIT TEXT TO CHUNKS RECURSIVELY USING LANG_CHAIN
-async function doc_to_chunk(pdf_document) {
+export async function doc_to_chunk(pdf_document) {
   // DUE TO RATE LIMITING CONSTRAINT AT HUGGING_FACE API
   // PAGE BY PAGE EMBEDDING IS NOT POSSIBLE THEREFORE
   // FOLLOWING CODE IS COMMENTED UNTIL WE EXPLORE ALTERNATIVE STRATEGY
@@ -26,5 +26,3 @@ async function doc_to_chunk(pdf_document) {
   // HERE IS THE NEW APPROACH INSTEAD OF PAGE BY PAGE CHUNKING
   return await lc_splitter.splitText(pre_processed_text);
 }
-
-module.exports = { doc_to_chunk };

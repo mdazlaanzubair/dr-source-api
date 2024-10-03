@@ -1,9 +1,7 @@
-const { removeStopwords } = require("stopword");
-const contractions = require("english_contractions");
-const emoji = require("emoji-dictionary");
+import getName from "emoji-dictionary";
 
 // FUNCTION TO PREPROCESS TEXT BEFORE SPLITTING AND VECTOR GENERATION
-function text_pre_processor(text) {
+export function text_pre_processor(text) {
   // CHANGING TEXT CASE
   const lowercasedText = text.toLowerCase();
 
@@ -19,19 +17,17 @@ function text_pre_processor(text) {
   // REPLACE EMOJIS WITH DESCRIPTIONS
   const replacedEmojisText = noUnicodeText.replace(
     /([\u{1F600}-\u{1F64F}])/gu,
-    (match) => emoji.getName(match) || ""
+    (match) => getName(match) || ""
   );
 
   // REMOVING STOP WORDS
   // const cleanedText = removeStopwords(replacedEmojisText.split(" ")).join(" ");
 
   // REMOVING CONTRACTIONS
-  const expanded_text = contractions.applyContraction(replacedEmojisText);
+  // const expanded_text = applyContraction(replacedEmojisText);
 
   // REMOVING EXTRA SPACES
-  const finalText = expanded_text.replace(/\s+/g, " ").trim();
+  const finalText = replacedEmojisText.replace(/\s+/g, " ").trim();
 
   return finalText;
 }
-
-module.exports = { text_pre_processor };

@@ -1,8 +1,8 @@
-const { default: axios } = require("axios");
-const { delay } = require("./delay");
+import axios from "axios";
+import { delay } from "./delay.js";
 
 // FUNCTION TO CONVERT TEXT CHUNKS INTO VECTOR EMBEDDINGS
-async function chunk_to_vec(text_chunks) {
+export async function chunk_to_vec(text_chunks) {
   // DUE TO RATE LIMITING CONSTRAINT AT HUGGING_FACE API
   // PAGE BY PAGE EMBEDDING IS NOT POSSIBLE THEREFORE
   // FOLLOWING CODE IS COMMENTED UNTIL WE EXPLORE ALTERNATIVE STRATEGY
@@ -50,6 +50,10 @@ async function chunk_to_vec(text_chunks) {
         { headers: HF_HEADER }
       );
 
+      if (i == 0) {
+        console.log("Dimensions", response.data[0].length);
+      }
+
       embedded_chunks.push(...response.data);
 
       // Adding a delay between batches to avoid rate limits
@@ -65,5 +69,3 @@ async function chunk_to_vec(text_chunks) {
 
   return embedded_chunks;
 }
-
-module.exports = { chunk_to_vec };
