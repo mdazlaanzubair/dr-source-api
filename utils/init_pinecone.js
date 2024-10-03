@@ -14,4 +14,3 @@ export const initPinecone = () => {
     throw new Error("Failed to initialize Pinecone Client");
   }
 };
-

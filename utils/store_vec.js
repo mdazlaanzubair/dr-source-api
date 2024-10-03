@@ -1,10 +1,12 @@
 // FUNCTION TO STORE THE VECTOR EMBEDDINGS TO THE DATABASE
 export async function store_vec(
-  embedded_chunks,
-  text_chunks,
+  document_embedded_chunks,
+  document_chunks,
   name_space,
   pineconeIndex
 ) {
+  console.log(document_chunks[0].page_content_chunk);
+
   // DUE TO RATE LIMITING CONSTRAINT AT HUGGING_FACE API
   // PAGE BY PAGE EMBEDDING IS NOT POSSIBLE THEREFORE
   // FOLLOWING CODE IS COMMENTED UNTIL WE EXPLORE ALTERNATIVE STRATEGY
@@ -33,13 +35,16 @@ export async function store_vec(
   // =========================
   // ITERATING ALL EMBEDDED_CHUNKS AND PREPARING REFERENCE FOR
   // PINECONE_DB FOR SAVING IN PINECONE_DB
-  const vectors_refs = embedded_chunks.map((vector, index) => ({
-    id: `${index}-doc-${Date.now().toString()}`, // Simple unique ID generation
-    values: vector, // VECTOR OF THE TEXT
-    metadata: {
-      page_text: text_chunks[index],
-    },
-  }));
+  const vectors_refs = document_embedded_chunks.map(
+    ({ page_num, vectors }, index) => ({
+      id: `${index}-doc-${Date.now().toString()}`, // Simple unique ID generation
+      values: vectors, // VECTOR OF THE TEXT
+      metadata: {
+        page_num: `${page_num}`,
+        page_text: document_chunks[index].page_content_chunk,
+      },
+    })
+  );
 
   // Splitting vectors into batches
   const batches = [];

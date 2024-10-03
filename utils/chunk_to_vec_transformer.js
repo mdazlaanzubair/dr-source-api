@@ -1,17 +1,19 @@
 import { pipeline } from "@xenova/transformers";
 
+const embeddingsGenerator = await pipeline(
+  "feature-extraction",
+  "Xenova/all-MiniLM-L6-v2"
+);
+
 // FUNCTION TO CONVERT TEXT CHUNKS INTO VECTOR EMBEDDINGS
-export async function chunk_to_vec_transformer(text_chunks) {
-  const embedded_chunks = [];
-
-  const embeddingsGenerator = await pipeline(
-    "feature-extraction",
-    "Xenova/all-MiniLM-L6-v2"
-  );
-
+export async function chunk_to_vec_transformer(
+  document_chunks,
+  isQuery = false
+) {
   // Iterate over each text chunk
-  for (const chunk of text_chunks) {
-    const output = await embeddingsGenerator(chunk, {
+  if (isQuery) {
+    const question = document_chunks;
+    const output = await embeddingsGenerator(question, {
       pooling: "mean",
       normalize: true,
     });
@@ -19,13 +21,31 @@ export async function chunk_to_vec_transformer(text_chunks) {
     // Check if output is a Float32Array
     if (output.data instanceof Float32Array) {
       // Convert Float32Array to regular array
-      const vectorArray = Array.from(output.data);
-      embedded_chunks.push(vectorArray); // Push the converted array to embedded_chunks
+      return Array.from(output.data);
     } else {
       console.error("Unexpected output format:", output.data);
+      return;
     }
-  }
+  } else {
+    const document_embedded_chunks = [];
 
-  console.log("embedded_chunks", embedded_chunks.length);
-  return embedded_chunks;
+    for (const { page_num, page_content_chunk } of document_chunks) {
+      const output = await embeddingsGenerator(page_content_chunk, {
+        pooling: "mean",
+        normalize: true,
+      });
+
+      // Check if output is a Float32Array
+      if (output.data instanceof Float32Array) {
+        // Convert Float32Array to regular array
+        const vectorArray = Array.from(output.data);
+        // Push the converted array to document_embedded_chunks
+        document_embedded_chunks.push({ page_num, vectors: vectorArray });
+      } else {
+        console.error("Unexpected output format:", output.data);
+      }
+    }
+
+    return document_embedded_chunks;
+  }
 }
