@@ -1,11 +1,16 @@
 // FUNCTION TO CONVERT TEXT CHUNKS INTO VECTOR EMBEDDINGS
+const cacheDir = "/tmp/transformers_cache";
+
 async function chunk_to_vec(document_chunks, isQuery = false) {
   const { pipeline } = await import("@xenova/transformers");
 
   // INITIALIZING THE EMBEDDING PIPELINE
   const embeddingsGenerator = await pipeline(
     "feature-extraction",
-    "Xenova/all-MiniLM-L6-v2"
+    "Xenova/all-MiniLM-L6-v2",
+    {
+      cache_dir: cacheDir, // Set cache dir to /tmp
+    }
   );
 
   // Iterate over each text chunk
