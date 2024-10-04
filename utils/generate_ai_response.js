@@ -1,5 +1,6 @@
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { configDotenv } from "dotenv";
+const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
+const { configDotenv } = require("dotenv");
+
 configDotenv();
 
 // INITIALIZING GEMINI AI SDK
@@ -20,7 +21,7 @@ const genAIModel = genAI.getGenerativeModel({
   },
 });
 
-export async function generateAIResponse(context, question) {
+async function generateAIResponse(context, question) {
   try {
     // GENERATE THE CONTENT BASED ON THE PROMPT
     const prompt = `You are an AI assistant and good in finding answers from the given context. 
@@ -47,3 +48,5 @@ export async function generateAIResponse(context, question) {
     throw new Error("Failed to generate AI response");
   }
 }
+
+module.exports = { generateAIResponse };

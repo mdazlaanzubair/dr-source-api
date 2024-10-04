@@ -1,7 +1,7 @@
-import { Pinecone } from "@pinecone-database/pinecone";
+const { Pinecone } = require("@pinecone-database/pinecone");
 
 // INITIALIZING PINECONE INSTANCE
-export const initPinecone = () => {
+function initPinecone() {
   try {
     const pc = new Pinecone({
       apiKey: process.env.PINECONE_API_KEY,
@@ -13,4 +13,6 @@ export const initPinecone = () => {
     console.error("error", error);
     throw new Error("Failed to initialize Pinecone Client");
   }
-};
+}
+
+module.exports = { initPinecone };

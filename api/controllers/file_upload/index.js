@@ -1,15 +1,16 @@
-import { configDotenv } from "dotenv";
-import { chunk_to_vec_transformer } from "../../../utils/chunk_to_vec_transformer.js";
-import { doc_to_chunk } from "../../../utils/doc_to_chunk.js";
-import { file_reader } from "../../../utils/file_reader.js";
-import { initPinecone } from "../../../utils/init_pinecone.js";
-import { store_vec } from "../../../utils/store_vec.js";
+const { configDotenv } = require("dotenv");
+const { initPinecone } = require("../../../utils/init_pinecone");
+const { file_reader } = require("../../../utils/file_reader");
+const { doc_to_chunk } = require("../../../utils/doc_to_chunk");
+const { chunk_to_vec } = require("../../../utils/chunk_to_vec");
+const { store_vec } = require("../../../utils/store_vec");
+
 configDotenv();
 
 // INITIALIZING PINECONE INSTANCE
 const pineconeIndex = initPinecone();
 
-export const file_uploader = async (req, res) => {
+async function file_uploader(req, res) {
   const file = req.file;
   const { fileName, slug, name_space } = req.body;
 
@@ -44,9 +45,7 @@ export const file_uploader = async (req, res) => {
 
     // CONVERTING DOCUMENTS CHUNKS INTO VECTOR EMBEDDINGS
     start_time = performance.now(); // RESET START TIME
-    const document_embedded_chunks = await chunk_to_vec_transformer(
-      document_chunks
-    );
+    const document_embedded_chunks = await chunk_to_vec(document_chunks);
     process_eval.text_embedding = performance.now() - start_time; // CALCULATING TIME
 
     // STORING VECTOR EMBEDDINGS TO PINECONE DATABASE
@@ -74,4 +73,6 @@ export const file_uploader = async (req, res) => {
     console.error("Error =======>", error);
     return res.status(500).json({ message: "Error while processing PDF" });
   }
-};
+}
+
+module.exports = { file_uploader };

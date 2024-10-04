@@ -1,7 +1,7 @@
-import PdfParse from "pdf-parse";
-import { text_pre_processor } from "./text_pre_processor.js";
+const PdfParse = require("pdf-parse");
+const { text_pre_processor } = require("./text_pre_processor");
 
-export const file_reader = async (file_buffer) => {
+async function file_reader(file_buffer) {
   try {
     const { text } = await PdfParse(file_buffer);
 
@@ -31,4 +31,6 @@ export const file_reader = async (file_buffer) => {
     console.log("Error while file reading ===>", error);
     throw error;
   }
-};
+}
+
+module.exports = { file_reader };

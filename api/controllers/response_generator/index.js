@@ -1,15 +1,15 @@
-import { configDotenv } from "dotenv";
-import { initPinecone } from "../../../utils/init_pinecone.js";
-import { chunk_to_vec_transformer } from "../../../utils/chunk_to_vec_transformer.js";
-import { text_pre_processor } from "../../../utils/text_pre_processor.js";
-import { generateAIResponse } from "../../../utils/generate_ai_response.js";
+const { configDotenv } = require("dotenv");
+const { text_pre_processor } = require("../../../utils/text_pre_processor");
+const { chunk_to_vec } = require("../../../utils/chunk_to_vec");
+const { generateAIResponse } = require("../../../utils/generate_ai_response");
+const { initPinecone } = require("../../../utils/init_pinecone");
 
 configDotenv();
 
 // INITIALIZING PINECONE INSTANCE
 const pineconeIndex = initPinecone();
 
-export const response_generator = async (req, res) => {
+async function response_generator(req, res) {
   const { question, name_space } = req.body;
 
   if (!question || question?.length <= 0) {
@@ -32,10 +32,7 @@ export const response_generator = async (req, res) => {
   try {
     // CONVERTING QUESTION INTO VECTOR EMBEDDINGS
     const cleaned_text = text_pre_processor(question);
-    const embedded_question = await chunk_to_vec_transformer(
-      cleaned_text,
-      true
-    );
+    const embedded_question = await chunk_to_vec(cleaned_text, true);
     process_eval.text_embedding = performance.now() - start_time; // CALCULATING TIME
 
     // QUERYING PINECONE DB TO GET THE MATCHING VECTOR
@@ -55,7 +52,7 @@ export const response_generator = async (req, res) => {
     // MAKING SOURCES FOR SENDING TO FRONTEND AS AN EVIDENCE
     const context = [];
     const context_source = [];
-    
+
     query_response.matches.forEach((match) => {
       context.push(match.metadata.page_text);
       context_source.push({
@@ -86,4 +83,6 @@ export const response_generator = async (req, res) => {
     console.error("Error =======>", error);
     return res.status(500).json({ message: "Error while processing PDF" });
   }
-};
+}
+
+module.exports = { response_generator };

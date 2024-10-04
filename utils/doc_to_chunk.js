@@ -1,7 +1,7 @@
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
 
 // FUNCTION TO SPLIT TEXT TO CHUNKS RECURSIVELY USING LANG_CHAIN
-export async function doc_to_chunk(pdf_document) {
+async function doc_to_chunk(pdf_document) {
   // INITIALIZING TEXT SPLITTER USING LANG-CHAIN
   const lc_splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 512,
@@ -27,3 +27,5 @@ export async function doc_to_chunk(pdf_document) {
   // RETURNING THE DOCUMENT CHUNKS
   return document_chunks;
 }
+
+module.exports = { doc_to_chunk };

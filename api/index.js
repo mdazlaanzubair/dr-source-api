@@ -1,14 +1,17 @@
-import cors from "cors";
-import dotenv from "dotenv";
-import multer from "multer";
-import express, { json } from "express";
-import { file_uploader } from "./controllers/file_upload/index.js";
-import { response_generator } from "./controllers/response_generator/index.js";
+const { configDotenv } = require("dotenv");
+const { json } = require("express");
+const express = require("express");
+const multer = require("multer");
+const cors = require("cors");
+const { file_uploader } = require("./controllers/file_upload/index.js");
+const {
+  response_generator,
+} = require("./controllers/response_generator/index.js");
 
 // Multer setup to read file into memory without storing it
 const upload = multer({ storage: multer.memoryStorage() });
 
-dotenv.config();
+configDotenv();
 
 const app = express();
 
