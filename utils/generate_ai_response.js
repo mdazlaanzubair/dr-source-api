@@ -3,48 +3,59 @@ const { configDotenv } = require("dotenv");
 
 configDotenv();
 
-// INITIALIZING GEMINI AI SDK
-// INITIALIZE THE AI MODEL WITH API KEY
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+async function generateAIResponse(context, question, api_key) {
+  // INITIALIZING GEMINI AI SDK
+  // INITIALIZE THE AI MODEL WITH API KEY
+  const genAI = new GoogleGenerativeAI(api_key);
 
-// Define the generative model configuration
-const genAIModel = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash", // Default to gemini-1.5-flash if no model is specified
-  generationConfig: {
-    responseMimeType: "application/json", // Expect a JSON response
-    responseSchema: {
-      type: SchemaType.OBJECT,
-      properties: {
-        reply: { type: SchemaType.STRING },
+  // Define the generative model configuration
+  const genAIModel = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash", // Default to gemini-1.5-flash if no model is specified
+    generationConfig: {
+      responseMimeType: "application/json", // Expect a JSON response
+      responseSchema: {
+        type: SchemaType.OBJECT,
+        properties: {
+          reply: { type: SchemaType.STRING },
+        },
       },
     },
-  },
-});
+  });
 
-async function generateAIResponse(context, question) {
   try {
     // GENERATE THE CONTENT BASED ON THE PROMPT
-    const prompt = `You are an AI assistant and good in finding answers from the given context. 
-          Your goal is to provide detailed answers to user from the provided context. Make sure
-          to provide all the details necessary to satisfy the user. If the answer is not provided 
-          in context, just politely say that did not find to answer in the document. Remember do 
-          not provide wrong answer.
-    
-          Context:
-          ${context}
-    
-          Question:
-          ${question}
-    
-          Answer:
-        `;
+    // Construct the RAG prompt
+    const prompt = `
+                    You are a highly knowledgeable assistant tasked with answering questions based on provided documents. 
+                    Your goal is to accurately retrieve the most relevant information from the documents, ensuring precision 
+                    and clarity in your response. If the query is vague or ambiguous, provide clarification or ask for more details. 
+                    If there is conflicting information in the documents, provide both perspectives with an explanation.
+                    
+                    Use the following guidelines when responding:
+                    1. Base your answers strictly on the information retrieved from the documents.
+                    2. Provide detailed, long, clear and descriptive responses, and ensuring factual accuracy.
+                    3. If multiple relevant sections are found, summarize them effectively, maintaining context.
+                    4. Include direct references to document sections or page numbers when applicable.
+                    5. Try to give response in markdown so that it can be rendered in UI for better readability.
+
+                    ### Query:
+                    ${question}
+
+                    ### Retrieved Documents:
+                    ${context.join("\n")}
+
+                    ### Answer:
+                  `;
+
     const result = await genAIModel.generateContent(prompt, {
-      temperature: 0.3,
+      temperature: 0.5,
     });
 
     return JSON.parse(result?.response?.text())?.reply;
   } catch (error) {
-    console.error("Error =========>", error);
+    console.log("##########################");
+    console.log("Error while generating AI response:\n", error);
+    console.log("##########################");
     throw new Error("Failed to generate AI response");
   }
 }

@@ -8,6 +8,7 @@ const supabase = createClient(
   process.env.SUPABASE_PUBLIC_KEY
 );
 
+// FUNCTION TO STORE FILE RECORD IN SUPABASE
 async function store_file_record(body) {
   try {
     const { slug } = body;
@@ -57,4 +58,43 @@ async function store_file_record(body) {
   }
 }
 
-module.exports = { store_file_record };
+// FUNCTION TO STORE USER QUERY IN SUPABASE
+async function store_query_record(body) {
+  try {
+    const { data, error } = await supabase
+      .from("queries")
+      .insert(body)
+      .select();
+
+    if (error) throw error;
+
+    result = data[0];
+    return result;
+  } catch (error) {
+    console.log("##########################");
+    console.log("Error while storing query record in supabase:\n", error);
+    console.log("##########################");
+    throw error;
+  }
+}
+
+// FUNCTION TO GET API KEY FROM SUPABASE
+async function get_api_key(user_id) {
+  try {
+    const { data, error } = await supabase
+      .from("user_api_key")
+      .select("api_key")
+      .eq("user_id", user_id);
+
+    if (error) throw error;
+
+    return data[0]?.api_key;
+  } catch (error) {
+    console.log("##########################");
+    console.log("Error while fetching api key from supabase:\n", error);
+    console.log("##########################");
+    throw error;
+  }
+}
+
+module.exports = { store_file_record, store_query_record, get_api_key };
