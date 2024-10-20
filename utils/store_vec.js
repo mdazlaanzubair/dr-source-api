@@ -33,6 +33,9 @@ async function store_vec(
       await pineconeIndex.namespace(`${name_space}`).upsert(batch);
     }
   } catch (error) {
+    console.log("##########################");
+    console.log("Error while storing vectors embeddings:\n", error);
+    console.log("##########################");
     throw error;
   }
 }

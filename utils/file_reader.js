@@ -28,7 +28,9 @@ async function file_reader(file_buffer) {
 
     return document;
   } catch (error) {
-    console.log("Error while file reading ===>", error);
+    console.log("##########################")
+    console.log("Error while file reading:\n", error);
+    console.log("##########################")
     throw error;
   }
 }
